@@ -1,26 +1,26 @@
 public class Laberinto {
-    private final int rows;
+    private final int filas;
     private final int cols;
-    private final Casilla[][] grid; // Make sure Casilla class is imported
+    private final Casilla[][] grid; 
 
-    private final int entryRow = 0;
+    private final int entryFila = 0;
     private final int entryCol = 0;
-    private final int exitRow;
+    private final int exitFila;
     private final int exitCol;
 
-    public Laberinto(int rows, int cols){
-        this.rows = rows;
+    public Laberinto(int filas, int cols){
+        this.filas = filas;
         this.cols = cols;
-        this.grid = LabGenerador.generate(rows,cols);
-        this.exitRow = rows - 1;
+        this.grid = LabCreador.generar(filas, cols);
+        this.exitFila = filas - 1;
         this.exitCol = cols - 1;
     }
 
-    public boolean canMove(int row, int col, Direccion dire){
-        if(row < 0 || row >= rows || col < 0 || col >= cols){
+    public boolean canMove(int fila, int col, Direccion dire){
+        if(fila < 0 || fila >= filas || col < 0 || col >= cols){
             return false;
         }
-        Casilla cas = grid[row][col];
+        Casilla cas = grid[fila][col];
         switch(dire){
             case ARRIBA:
                 return !cas.hasTopWall(Direccion.ARRIBA);
@@ -34,14 +34,14 @@ public class Laberinto {
                     return false;
         }
     }
-    public boolean isExit(int row, int col){
-        return row == exitRow && col == exitCol;
+    public boolean isExit(int fila, int col){
+        return fila == exitFila && col == exitCol;
     }
-    public int getRows(){return rows;}
+    public int getFilasFilas(){return filas;}
     public int getCols(){return cols;}
     public Casilla[][] getGrid(){return grid;}
-    public int getEntryRow(){return entryRow;}
+    public int getEntryFila(){return entryFila;}
     public int getEntryCol(){return entryCol;}
-    public int getExitRow(){return exitRow;}
+    public int getExitFila(){return exitFila;}
     public int getExitCol(){return exitCol;}
 }

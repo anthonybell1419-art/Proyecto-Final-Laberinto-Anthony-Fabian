@@ -1,20 +1,20 @@
 public class Player {
-    private int row;
+    private int fila;
     private int col;
 
-    public Player(int row,int col){
-        this.row = row;
+    public Player(int fila,int col){
+        this.fila = fila;
         this.col = col;
     }
-    public int getRow(){return row;}
+    public int getRow(){return fila;}
     public int getCol(){return col;}
 
 
     public boolean move(Laberinto lab, Direccion dire){
-        if(!lab.canMove(row,col,dire)){
+        if(!lab.canMove(fila,col,dire)){
             return false;
         }
-        row += dire.getDRow();
+        fila += dire.getDRow();
         col += dire.getDCol();
         return true;
     }

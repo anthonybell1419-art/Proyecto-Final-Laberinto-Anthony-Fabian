@@ -1,5 +1,5 @@
 public class Casilla {
-    private final int row;
+    private final int fila;
     private final int col;
 
     private boolean paredArriba = true;
@@ -9,11 +9,11 @@ public class Casilla {
 
     private boolean visitado = false;
 
-    public Casilla(int row,int col){
-        this.row = row;
+    public Casilla(int fila,int col){
+        this.fila = fila;
         this.col = col;
     }
-    public int getRow(){return row;}
+    public int getFila(){return fila;}
     public int getCol(){return col;}
     public boolean hasTopWall(Direccion dire){return paredArriba;}
     public boolean hasBottomWall(Direccion dire){return paredAbajo;}

@@ -4,13 +4,13 @@ public enum Direccion{
     IZQUIERDA(0,-1),
     DERECHA(0,1);
 
-    private final int dRow;
+    private final int dFila;
     private final int dCol;
 
-    Direccion(int dRow, int dCol){
-        this.dRow = dRow;
+    Direccion(int dFila, int dCol){
+        this.dFila = dFila;
         this.dCol = dCol;
     }
-    public int getDRow(){return dRow;}
+    public int getDRow(){return dFila;}
     public int getDCol(){return dCol;}
     }
