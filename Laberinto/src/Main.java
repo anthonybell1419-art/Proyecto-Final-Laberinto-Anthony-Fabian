@@ -6,7 +6,7 @@ public class Main extends Application {
     @Override
     public void start(Stage stage){
         stage.setTitle("Laberinto");
-        stage.setScene(menuView.create(stage));
+        stage.setScene(menu.create(stage));
         stage.setResizable(true);
         stage.show();
     }

@@ -6,7 +6,7 @@ public class Player {
         this.fila = fila;
         this.col = col;
     }
-    public int getRow(){return fila;}
+    public int getFila(){return fila;}
     public int getCol(){return col;}
 
 
@@ -14,7 +14,7 @@ public class Player {
         if(!lab.canMove(fila,col,dire)){
             return false;
         }
-        fila += dire.getDRow();
+        fila += dire.getDFila();
         col += dire.getDCol();
         return true;
     }

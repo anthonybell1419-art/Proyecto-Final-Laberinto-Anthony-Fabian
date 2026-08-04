@@ -23,7 +23,7 @@ public class LabCreador {
             Casilla next = null;
             Direccion chosenDir = null;
             for(Direccion dire : direcciones){
-                int newFila = current.getFila() + dire.getDRow();
+                int newFila = current.getFila() + dire.getDFila();
                 int newCol = current.getCol() + dire.getDCol();
 
                 if(newFila >= 0 && newFila < filas && newCol >= 0 && newCol < cols && !grid[newFila][newCol].isVisited()){
@@ -45,19 +45,19 @@ public class LabCreador {
     }
     private static void removeWallBetween(Casilla current, Casilla next, Direccion dire){
         switch(dire){
-            case ARRIBA:
+            case NORTE:
                 current.setTopWall(false);
                 next.setBottomWall(false);
                 break;
-            case ABAJO:
+            case SUR:
                 current.setBottomWall(false);
                 next.setTopWall(false);
                 break;
-            case IZQUIERDA:
+            case OESTE:
                 current.setLeftWall(false);
                 next.setRightWall(false);
                 break;
-            case DERECHA:
+            case ESTE:
                 current.setRightWall(false);
                 next.setLeftWall(false);
                 break;

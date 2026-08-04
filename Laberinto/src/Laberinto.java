@@ -22,14 +22,14 @@ public class Laberinto {
         }
         Casilla cas = grid[fila][col];
         switch(dire){
-            case ARRIBA:
-                return !cas.hasTopWall(Direccion.ARRIBA);
-            case ABAJO:
-                return !cas.hasBottomWall(Direccion.ABAJO);
-            case IZQUIERDA:
-                return !cas.hasLeftWall(Direccion.IZQUIERDA);
-            case DERECHA:
-                return !cas.hasRightWall(Direccion.DERECHA);
+            case NORTE:
+                return !cas.hasTopWall(Direccion.NORTE);
+            case SUR:
+                return !cas.hasBottomWall(Direccion.SUR);
+            case OESTE:
+                return !cas.hasLeftWall(Direccion.OESTE);
+            case ESTE:
+                return !cas.hasRightWall(Direccion.ESTE);
                 default:
                     return false;
         }
@@ -37,7 +37,7 @@ public class Laberinto {
     public boolean isExit(int fila, int col){
         return fila == exitFila && col == exitCol;
     }
-    public int getFilasFilas(){return filas;}
+    public int getFilas(){return filas;}
     public int getCols(){return cols;}
     public Casilla[][] getGrid(){return grid;}
     public int getEntryFila(){return entryFila;}

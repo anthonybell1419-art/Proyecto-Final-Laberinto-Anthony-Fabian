@@ -1,8 +1,8 @@
 public enum Direccion{
-    ARRIBA(-1,0),
-    ABAJO(1,0),
-    IZQUIERDA(0,-1),
-    DERECHA(0,1);
+    NORTE(-1,0),
+    SUR(1,0),
+    OESTE(0,-1),
+    ESTE(0,1);
 
     private final int dFila;
     private final int dCol;
@@ -11,6 +11,6 @@ public enum Direccion{
         this.dFila = dFila;
         this.dCol = dCol;
     }
-    public int getDRow(){return dFila;}
+    public int getDFila(){return dFila;}
     public int getDCol(){return dCol;}
     }
