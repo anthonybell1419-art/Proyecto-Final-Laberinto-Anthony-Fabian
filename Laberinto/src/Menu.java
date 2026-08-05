@@ -79,7 +79,7 @@ public class Menu {
                     "-fx-text-fill:white;" +
                     "-fx-background-radius:8;" +
                     "-fx-cursor:hand;"));
-    btn.setOnAction(event -> stage.setScene(Juego.crear(stage, dificultad)));
+    // btn.setOnAction(event -> stage.setScene(Juego.crear(stage, dificultad)));
     btnBox.getChildren().add(btn);
 }
         root.getChildren().addAll( btnBox);
