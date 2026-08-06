@@ -32,8 +32,8 @@ public class Menu {
 
         VBox btnBox = new VBox(14);
         btnBox.setAlignment(Pos.CENTER);
-        btnBox.setPadding(new Insets(180, 0, 0, 0)); 
-        for(Dificultad dificultad : Dificultad.values()){String timeInfo = dificultad.getTimeLimitSeconds() > 0 ? " - " + dificultad.getTimeLimitSeconds() + " s limite" : " - sin limite de tiempo";
+        btnBox.setPadding(new Insets(200, 0, 0, 0)); 
+        for(Dificultad dificultad : Dificultad.values()){
         String ruta = "";
 
     switch (dificultad) {
@@ -53,7 +53,7 @@ public class Menu {
     img.setFitHeight(70);
     img.setPreserveRatio(true);
 
-    Label texto = new Label(dificultad.getNombre() + "(" + dificultad.getFilas() + "x" + dificultad.getCols() + ")" + timeInfo);
+    Label texto = new Label(dificultad.getNombre());
 
     texto.setTextFill(Color.WHITE);
     texto.setFont(Font.font(14));
@@ -66,25 +66,25 @@ public class Menu {
     btn.setGraphic(contenido);
     btn.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
 
-    btn.setPrefWidth(420);
-    btn.setPrefHeight(90);
+    btn.setPrefWidth(200);
+    btn.setPrefHeight(70);
 
     btn.setStyle(
-            "-fx-background-color:#7B2CBF;" +
+            "-fx-background-color:#4C1D95;" +
             "-fx-text-fill:white;" +
             "-fx-background-radius:8;" +
             "-fx-cursor:hand;");
 
     btn.setOnMouseEntered(event ->
             btn.setStyle(
-                    "-fx-background-color:#9D4EDD;" +
+                    "-fx-background-color:#6D28D9;" +
                     "-fx-text-fill:white;" +
                     "-fx-background-radius:8;" +
                     "-fx-cursor:hand;"));
 
     btn.setOnMouseExited(event ->
             btn.setStyle(
-                    "-fx-background-color:#7B2CBF;" +
+                    "-fx-background-color:#4C1D95;" +
                     "-fx-text-fill:white;" +
                     "-fx-background-radius:8;" +
                     "-fx-cursor:hand;"));
@@ -92,6 +92,9 @@ public class Menu {
     btnBox.getChildren().add(btn);
 }
         Button btnMusica = new Button("🔊 Música");
+        btnMusica.setPrefWidth(100);
+        btnMusica.setPrefHeight(30);
+        btnMusica.setFont(Font.font(16));
         btnMusica.setOnAction(e -> {
 
         if(musica.getStatus() == MediaPlayer.Status.PLAYING){
@@ -103,10 +106,24 @@ public class Menu {
     }});
 
         btnMusica.setStyle(
-            "-fx-background-color:#7B2CBF;" +
+            "-fx-background-color:#4C1D95;" +
             "-fx-text-fill:white;" +
             "-fx-background-radius:8;" +
             "-fx-cursor:hand;");
+
+        btnMusica.setOnMouseEntered(e ->
+        btnMusica.setStyle(
+            "-fx-background-color:#6D28D9;" +
+            "-fx-text-fill:white;" +
+            "-fx-background-radius:8;" +
+            "-fx-cursor:hand;"));
+
+        btnMusica.setOnMouseExited(e ->
+        btnMusica.setStyle(
+            "-fx-background-color:#4C1D95;" +
+            "-fx-text-fill:white;" +
+            "-fx-background-radius:8;" +
+            "-fx-cursor:hand;"));
 
 root.getChildren().addAll(btnBox, btnMusica);
 return new Scene(root, 420, 520);
