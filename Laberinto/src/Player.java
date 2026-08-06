@@ -10,12 +10,12 @@ public class Player {
     public int getCol(){return col;}
 
 
-    public boolean move(Laberinto lab, Direccion dire){
-        if(!lab.canMove(fila,col,dire)){
+    public boolean move(Laberinto lab, Direccion dir){
+        if(!lab.canMove(fila,col,dir)){
             return false;
         }
-        fila += dire.getDFila();
-        col += dire.getDCol();
+        fila += dir.getDFila();
+        col += dir.getDCol();
         return true;
     }
 }

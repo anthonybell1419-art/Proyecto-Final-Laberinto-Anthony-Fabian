@@ -26,10 +26,10 @@ public class LabSolucionador {
             int f = current[0];
             int c = current[1];
 
-            for(Direccion dire : Direccion.values()){
-                if(!lab.canMove(f,c,dire))continue;
-                int newFila = f + dire.getDFila();
-                int newCol = c + dire.getDCol();
+            for(Direccion dir : Direccion.values()){
+                if(!lab.canMove(f,c,dir))continue;
+                int newFila = f + dir.getDFila();
+                int newCol = c + dir.getDCol();
                 if(newFila < 0 || newFila >= filas || newCol < 0 || newCol >= cols) continue;
                 visited[newFila][newCol] = true;
                 parentFila[newFila][newCol] = f;

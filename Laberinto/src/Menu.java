@@ -88,7 +88,7 @@ public class Menu {
                     "-fx-text-fill:white;" +
                     "-fx-background-radius:8;" +
                     "-fx-cursor:hand;"));
-    // btn.setOnAction(event -> stage.setScene(Juego.crear(stage, dificultad)));
+    btn.setOnAction(event -> stage.setScene(Juego.crear(stage, dificultad)));
     btnBox.getChildren().add(btn);
 }
         Button btnMusica = new Button("🔊 Música");
@@ -125,7 +125,7 @@ public class Menu {
             "-fx-background-radius:8;" +
             "-fx-cursor:hand;"));
 
-root.getChildren().addAll(btnBox, btnMusica);
-return new Scene(root, 420, 520);
+        root.getChildren().addAll(btnBox, btnMusica);
+        return new Scene(root, 420, 520);
     }
 }
