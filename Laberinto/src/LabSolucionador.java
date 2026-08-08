@@ -6,7 +6,7 @@ public class LabSolucionador {
     public static List<int[]> solucion(Laberinto lab, int startFila, int startCol) {
         int filas = lab.getFilas();
         int cols = lab.getCols();
-        
+
         boolean[][] visited = new boolean[filas][cols];
         int[][] parentFila = new int[filas][cols];
         int[][] parentCol = new int[filas][cols];
@@ -31,6 +31,8 @@ public class LabSolucionador {
                 int newFila = f + dir.getDFila();
                 int newCol = c + dir.getDCol();
                 if(newFila < 0 || newFila >= filas || newCol < 0 || newCol >= cols) continue;
+                if(visited[newFila][newCol]) continue; 
+
                 visited[newFila][newCol] = true;
                 parentFila[newFila][newCol] = f;
                 parentCol[newFila][newCol] = c;

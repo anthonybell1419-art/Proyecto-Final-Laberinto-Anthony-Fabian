@@ -7,24 +7,28 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
+import java.io.InputStream;
+import java.text.Normalizer;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class Juego {
-    
     private static final int CASILLA_TAMAÑO_BASE = 26;
 
     public static Scene crear(Stage stage, Dificultad dificultad){
@@ -35,7 +39,6 @@ public class Juego {
         Laberinto lab = new Laberinto(dificultad.getFilas(), dificultad.getCols());
         Player player = new Player(lab.getEntryFila(), lab.getEntryCol());
 
-        // Tamaño de celda dinámico
         double[] casillaTam = {CASILLA_TAMAÑO_BASE};
 
         Canvas canvas = new Canvas(lab.getCols() * casillaTam[0], lab.getFilas() * casillaTam[0]);
@@ -43,9 +46,33 @@ public class Juego {
         ScrollPane scrollPane = new ScrollPane(canvas);
         scrollPane.setPannable(true);
         scrollPane.setStyle("-fx-background:#1e1e2f; -fx-background-color: transparent;");
-        // Evita que aparezcan barras de scroll 
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+
+        // --- Panel lateral con la imagen de la dificultad
+        ImageView imagenDificultadView = new ImageView();
+        imagenDificultadView.setPreserveRatio(true);
+        imagenDificultadView.setSmooth(true);
+
+        StackPane panelImagen = new StackPane(imagenDificultadView);
+        panelImagen.setPadding(new Insets(20));
+        panelImagen.setStyle("-fx-background-color:#20203a;");
+        HBox.setHgrow(panelImagen, Priority.ALWAYS);
+
+        Image imgDificultad = cargarImagenDificultad(dificultad);
+        if (imgDificultad != null) {
+            imagenDificultadView.setImage(imgDificultad);
+        } else {
+            Label placeholder = new Label("Coloca aquí:\nimages/" + nombreArchivoDificultad(dificultad));
+            placeholder.setTextFill(Color.web("#5b5b7a"));
+            placeholder.setFont(Font.font(13));
+            placeholder.setStyle("-fx-text-alignment:center;");
+            panelImagen.getChildren().add(placeholder);
+        }
+        imagenDificultadView.fitWidthProperty().bind(panelImagen.widthProperty().subtract(40));
+        imagenDificultadView.fitHeightProperty().bind(panelImagen.heightProperty().subtract(40));
+
+        HBox centerBox = new HBox(scrollPane, panelImagen);
 
         Label dificultadLabel = new Label ("Dificultad: " + dificultad.getNombre());
         dificultadLabel.setTextFill(Color.LIGHTGRAY);
@@ -74,7 +101,7 @@ public class Juego {
         BorderPane root = new BorderPane();
         root.setStyle("-fx-background-color:#1e1e2f;");
         root.setTop(BarraSuperior);
-        root.setCenter(scrollPane);
+        root.setCenter(centerBox);
         root.setFocusTraversable(true);
 
         double sceneWidth = Math.min(960, lab.getCols() * casillaTam[0] + 40);
@@ -85,25 +112,31 @@ public class Juego {
         int[] segundosP = {0};
         AtomicReference<List<int[]>> hintPath = new AtomicReference<>();
 
-        Runnable reDibujar = () -> crearLaberinto(j, lab, player, hintPath.get(), casillaTam[0]);
+        Image scoobyNorte = cargarImagen("/Imagenes/scoobyNorte.png");
+        Image scoobySur   = cargarImagen("/Imagenes/scoobySur.png");
+        Image scoobyEste  = cargarImagen("/Imagenes/scoobyEste.png");
+        Image scoobyOeste = cargarImagen("/Imagenes/scoobyOeste.png");
 
-        // Recalcula el tamaño de celda según el espacio real disponible en el ScrollPane
+        Runnable reDibujar = () -> crearLaberinto(j, lab, player, hintPath.get(), casillaTam[0],
+                scoobyNorte, scoobySur, scoobyEste, scoobyOeste);
+
+        // Recalcula el tamaño de celda 
         Runnable ajustarTamaño = () -> {
-            double anchoDisponible = scrollPane.getViewportBounds() != null
-                    ? scrollPane.getViewportBounds().getWidth()
-                    : scrollPane.getWidth();
-            double altoDisponible = scrollPane.getViewportBounds() != null
-                    ? scrollPane.getViewportBounds().getHeight()
-                    : scrollPane.getHeight();
+            double alturaTotal = scene.getHeight();
+            double anchoTotal = scene.getWidth();
+            double alturaBarra = BarraSuperior.getHeight() > 0 ? BarraSuperior.getHeight() : 52;
+            double altoDisponible = alturaTotal - alturaBarra - 20;
+            if (altoDisponible <= 0 || anchoTotal <= 0) return;
 
-            if (anchoDisponible <= 0 || altoDisponible <= 0) return;
+            double anchoImagen = clamp(anchoTotal * 0.28, 220, 420);
+            double anchoDisponibleLab = anchoTotal - anchoImagen - 20;
+            if (anchoDisponibleLab < 150) {
+                anchoDisponibleLab = anchoTotal * 0.55;
+            }
 
-            double tamPorAncho = anchoDisponible / lab.getCols();
+            double tamPorAncho = anchoDisponibleLab / lab.getCols();
             double tamPorAlto = altoDisponible / lab.getFilas();
-            double nuevoTam = Math.min(tamPorAncho, tamPorAlto);
-
-            // Evita celdas demasiado pequeñas en ventanas muy chicas
-            nuevoTam = Math.max(8, nuevoTam);
+            double nuevoTam = Math.max(8, Math.min(tamPorAncho, tamPorAlto));
 
             casillaTam[0] = nuevoTam;
             canvas.setWidth(lab.getCols() * casillaTam[0]);
@@ -111,10 +144,8 @@ public class Juego {
             reDibujar.run();
         };
 
-        // Se dispara cada vez que cambia el tamaño visible del ScrollPane
-        scrollPane.viewportBoundsProperty().addListener((obs, oldB, newB) -> ajustarTamaño.run());
-
-        //Para el cambio de pantalla completa
+        scene.widthProperty().addListener((obs, o, n) -> ajustarTamaño.run());
+        scene.heightProperty().addListener((obs, o, n) -> ajustarTamaño.run());
         stage.fullScreenProperty().addListener((obs, wasFull, isFull) -> Platform.runLater(ajustarTamaño));
 
         Timeline tiempo = new Timeline(new KeyFrame(Duration.seconds(1), event -> {
@@ -161,8 +192,8 @@ public class Juego {
             if (dir == null) return;
 
             boolean moved = player.move(lab, dir);
+            reDibujar.run();
             if (moved) {
-                reDibujar.run();
                 if (lab.isExit(player.getFila(), player.getCol())) {
                     gameOver[0] = true;
                     tiempo.stop();
@@ -178,6 +209,10 @@ public class Juego {
         });
 
         return scene;
+    }
+
+    private static double clamp(double valor, double min, double max) {
+        return Math.max(min, Math.min(max, valor));
     }
 
     private static Direccion keyToDirection(KeyCode code) {
@@ -199,20 +234,21 @@ public class Juego {
         }
     }
 
-    private static void crearLaberinto(GraphicsContext j, Laberinto laberinto, Player player, List<int[]> hintPath, double casillaTamaño) {
+    private static void crearLaberinto(GraphicsContext j, Laberinto laberinto, Player player,
+                                        List<int[]> hintPath, double casillaTamaño,
+                                        Image scoobyNorte, Image scoobySur,
+                                        Image scoobyEste, Image scoobyOeste) {
         double w = j.getCanvas().getWidth();
         double h = j.getCanvas().getHeight();
 
         j.setFill(Color.web("#1e1e2f"));
         j.fillRect(0, 0, w, h);
 
-        // Entrada y salida
         j.setFill(Color.web("#2ecc71"));
         j.fillRect(laberinto.getEntryCol() * casillaTamaño, laberinto.getEntryFila() * casillaTamaño, casillaTamaño, casillaTamaño);
         j.setFill(Color.web("#e74c3c"));
         j.fillRect(laberinto.getExitCol() * casillaTamaño, laberinto.getExitFila() * casillaTamaño, casillaTamaño, casillaTamaño);
 
-        // Camino de pista
         if (hintPath != null) {
             j.setFill(Color.web("#f1c40f", 0.55));
             for (int[] p : hintPath) {
@@ -220,7 +256,6 @@ public class Juego {
             }
         }
 
-        // Paredes y rejilla
         Casilla[][] grid = laberinto.getGrid();
         j.setStroke(Color.web("#f5f5f5"));
         j.setLineWidth(Math.max(1, casillaTamaño / 13.0));
@@ -243,54 +278,150 @@ public class Juego {
             }
         }
 
-        // Jugador
-        double px = player.getCol() * casillaTamaño + casillaTamaño / 2.0;
-        double py = player.getFila() * casillaTamaño + casillaTamaño / 2.0;
-        j.setFill(Color.web("#3498db"));
-        j.fillOval(px - (casillaTamaño - 8) / 2.0, py - (casillaTamaño - 8) / 2.0, casillaTamaño - 8, casillaTamaño - 8);
+        double px = player.getCol() * casillaTamaño;
+        double py = player.getFila() * casillaTamaño;
+        Image imgJugador = seleccionarImagenJugador(player.getDireccion(),
+                scoobyNorte, scoobySur, scoobyEste, scoobyOeste);
+
+        if (imgJugador != null) {
+            j.drawImage(imgJugador, px, py, casillaTamaño, casillaTamaño);
+        } else {
+            double cx = px + casillaTamaño / 2.0;
+            double cy = py + casillaTamaño / 2.0;
+            j.setFill(Color.web("#3498db"));
+            j.fillOval(cx - (casillaTamaño - 8) / 2.0, cy - (casillaTamaño - 8) / 2.0, casillaTamaño - 8, casillaTamaño - 8);
+        }
+    }
+
+    private static Image seleccionarImagenJugador(Direccion dir, Image norte, Image sur, Image este, Image oeste) {
+        if (dir == null) return sur;
+        switch (dir) {
+            case NORTE: return norte;
+            case SUR:   return sur;
+            case ESTE:  return este;
+            case OESTE: return oeste;
+            default:    return sur;
+        }
     }
 
     private static void showVictoryDialog(Stage stage, Dificultad dificultad, int segundosP) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("¡Victoria!");
-        alert.setHeaderText("Llegaste a la salida");
-        alert.setContentText("Tiempo total: " + formatTime(segundosP));
+        stage.setScene(buildVictoryScene(stage, dificultad));
+    }
 
-        ButtonType deNuevo = new ButtonType("Jugar de nuevo");
-        ButtonType menu = new ButtonType("Menu");
-        alert.getButtonTypes().setAll(deNuevo, menu);
+    private static Scene buildVictoryScene(Stage stage, Dificultad dificultad) {
+        StackPane root = new StackPane();
+        root.setStyle("-fx-background-color:#1e1e2f;");
 
-        alert.showAndWait().ifPresent(response -> {
-            if (response == deNuevo) {
-                stage.setScene(buildGameScene(stage, dificultad));
-            } else {
-                stage.setScene(Menu.crear(stage));
-            }
-        });
+        Image imgVictoria = cargarImagen("/Imagenes/victoria.png");
+        if (imgVictoria != null) {
+            ImageView fondo = new ImageView(imgVictoria);
+            fondo.setPreserveRatio(false);
+            fondo.fitWidthProperty().bind(root.widthProperty());
+            fondo.fitHeightProperty().bind(root.heightProperty());
+            root.getChildren().add(fondo);
+        } else {
+            Label placeholder = new Label("Coloca aquí: Imagenes/victoria.png");
+            placeholder.setTextFill(Color.web("#5b5b7a"));
+            placeholder.setFont(Font.font(16));
+            root.getChildren().add(placeholder);
+        }
+
+        Button jugarDeNuevoBtn = new Button("Jugar de nuevo");
+        Button menuBtn = new Button("Menu");
+
+        String estiloBotonMenu =
+                "-fx-background-color:#6c3483; -fx-text-fill:white; -fx-font-size:16px; "
+            + "-fx-font-weight:bold; -fx-background-radius:10; -fx-padding:14 34 14 34; "
+            + "-fx-cursor:hand;";
+        jugarDeNuevoBtn.setStyle(estiloBotonMenu);
+        menuBtn.setStyle(estiloBotonMenu);
+
+        VBox botones = new VBox(16, jugarDeNuevoBtn, menuBtn);
+        botones.setAlignment(Pos.CENTER);
+        StackPane.setAlignment(botones, Pos.BOTTOM_CENTER);
+        StackPane.setMargin(botones, new Insets(100, 0, 60, 0));
+        root.getChildren().add(botones);
+
+        jugarDeNuevoBtn.setOnAction(e -> stage.setScene(buildGameScene(stage, dificultad)));
+        menuBtn.setOnAction(e -> stage.setScene(Menu.crear(stage)));
+
+        double anchoActual = stage.getScene() != null ? stage.getScene().getWidth() : 960;
+        double altoActual = stage.getScene() != null ? stage.getScene().getHeight() : 720;
+        return new Scene(root, anchoActual, altoActual);
     }
 
     private static void showTimeUpDialog(Stage stage, Dificultad dificultad) {
-        Alert alert = new Alert(Alert.AlertType.WARNING);
-        alert.setTitle("Tiempo agotado");
-        alert.setHeaderText("Se acabo el tiempo");
-        alert.setContentText("No lo lograste.");
+        stage.setScene(buildTimeUpScene(stage, dificultad));
+    }
 
-        ButtonType reitentar = new ButtonType("Reintentar");
-        ButtonType menu = new ButtonType("Menu");
-        alert.getButtonTypes().setAll(reitentar, menu);
+    private static Scene buildTimeUpScene(Stage stage, Dificultad dificultad) {
+        StackPane root = new StackPane();
+        root.setStyle("-fx-background-color:#1e1e2f;");
 
-        alert.showAndWait().ifPresent(response -> {
-            if (response == reitentar) {
-                stage.setScene(buildGameScene(stage, dificultad));
-            } else {
-                stage.setScene(Menu.crear(stage));
-            }
-        });
+        Image imgTiempoAgotado = cargarImagen("/Imagenes/agotado.png");
+        if (imgTiempoAgotado != null) {
+            ImageView fondo = new ImageView(imgTiempoAgotado);
+            fondo.setPreserveRatio(false);
+            fondo.fitWidthProperty().bind(root.widthProperty());
+            fondo.fitHeightProperty().bind(root.heightProperty());
+            root.getChildren().add(fondo);
+        } else {
+            Label placeholder = new Label("Coloca aquí: Imagenes/agotado.png");
+            placeholder.setTextFill(Color.web("#5b5b7a"));
+            placeholder.setFont(Font.font(16));
+            root.getChildren().add(placeholder);
+        }
+
+        Button reintentarBtn = new Button("Reintentar");
+        Button menuBtn = new Button("Menu");
+
+        String estiloBotonMenu =
+                "-fx-background-color:#6c3483; -fx-text-fill:white; -fx-font-size:16px; "
+            + "-fx-font-weight:bold; -fx-background-radius:10; -fx-padding:14 34 14 34; "
+            + "-fx-cursor:hand;";
+        reintentarBtn.setStyle(estiloBotonMenu);
+        menuBtn.setStyle(estiloBotonMenu);
+
+        VBox botones = new VBox(16, reintentarBtn, menuBtn);
+        botones.setAlignment(Pos.CENTER);
+        StackPane.setAlignment(botones, Pos.BOTTOM_CENTER);
+        StackPane.setMargin(botones, new Insets(0, 0, 60, 0));
+        root.getChildren().add(botones);
+
+        reintentarBtn.setOnAction(e -> stage.setScene(buildGameScene(stage, dificultad)));
+        menuBtn.setOnAction(e -> stage.setScene(Menu.crear(stage)));
+
+        double anchoActual = stage.getScene() != null ? stage.getScene().getWidth() : 960;
+        double altoActual = stage.getScene() != null ? stage.getScene().getHeight() : 720;
+        return new Scene(root, anchoActual, altoActual);
     }
 
     private static String formatTime(int totalSeconds) {
         int m = totalSeconds / 60;
         int s = totalSeconds % 60;
         return String.format("%02d:%02d", m, s);
+    }
+
+    private static Image cargarImagenDificultad(Dificultad dificultad) {
+        return cargarImagen("/Imagenes/" + nombreArchivoDificultad(dificultad));
+    }
+
+    private static String nombreArchivoDificultad(Dificultad dificultad) {
+        return normalizarNombre(dificultad.getNombre()) + ".png";
+    }
+
+    private static Image cargarImagen(String rutaClasspath) {
+        try (InputStream stream = Juego.class.getResourceAsStream(rutaClasspath)) {
+            if (stream == null) return null;
+            return new Image(stream);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private static String normalizarNombre(String nombre) {
+        String sinTildes = Normalizer.normalize(nombre, Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "");
+        return sinTildes.toLowerCase().trim().replaceAll("\\s+", "_");
     }
 }
